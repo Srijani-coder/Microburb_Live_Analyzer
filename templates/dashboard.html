@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Microburbs Dashboard – {{ suburb }}</title>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .frame {
+            border: 4px solid #6a0dad;
+            border-radius: 12px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 25px;
+            background: #ffffff;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            text-align: center;
+            color: #6a0dad;
+            margin-top: 0;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 10px;
+            color: #6a0dad;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .cards-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #faf7ff;
+            border-radius: 10px;
+            padding: 16px 18px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #4e148c;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .stat-item {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 260px;
+        }
+
+        .table-card {
+            margin-top: 20px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background: #6a0dad;
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="frame">
+
+    <a class="back-link" href="/">← Search again</a>
+
+    <h2>{{ suburb }} – Live Property Dashboard</h2>
+    <p class="subtitle">
+        Property type: {{ prop_type }} &nbsp; | &nbsp;
+        Listings from Microburbs sandbox API.
+    </p>
+
+    <!-- Summary cards -->
+    <div class="cards-row">
+        <div class="card">
+            <h3>Market Summary</h3>
+            <p class="stat-item">Total Listings: {{ stats.total_listings }}</p>
+            <p class="stat-item">Median Price: {{ stats.median_price }}</p>
+            <p class="stat-item">Mean Price: {{ stats.mean_price }}</p>
+            <p class="stat-item">Min Price: {{ stats.min_price }}</p>
+            <p class="stat-item">Max Price: {{ stats.max_price }}</p>
+            {% if stats.avg_bedrooms %}
+            <p class="stat-item">Avg Bedrooms: {{ stats.avg_bedrooms }}</p>
+            {% endif %}
+            {% if stats.avg_bathrooms %}
+            <p class="stat-item">Avg Bathrooms: {{ stats.avg_bathrooms }}</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3>Insights</h3>
+            <p class="stat-item">Yearly listings chart shows how active the local market is.</p>
+            <p class="stat-item">Property type chart reveals the mix of houses vs units etc.</p>
+            <p class="stat-item">Bedrooms vs price helps understand upgrade steps within the suburb.</p>
+        </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="cards-row">
+        <div class="card">
+            <h3>Listings per Year</h3>
+            <div class="chart-container">
+                <canvas id="yearChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Median Price by Property Type</h3>
+            <div class="chart-container">
+                <canvas id="ptypeChart"></canvas>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Median Price by Bedrooms</h3>
+            <div class="chart-container">
+                <canvas id="bedChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Listings table -->
+    <div class="card table-card">
+        <h3>Sample Listings (First 50)</h3>
+        {% if table_data and table_data|length > 0 %}
+        <div style="overflow-x:auto;">
+            <table>
+                <tr>
+                    {% for col in table_data[0].keys() %}
+                    <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+                {% for row in table_data %}
+                <tr>
+                    {% for val in row.values() %}
+                    <td>{{ val }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% else %}
+        <p><i>No rows available to display.</i></p>
+        {% endif %}
+    </div>
+
+    <!-- Embed JSON data for charts -->
+    <script id="yearData" type="application/json">
+        {{ yearly_sales | tojson }}
+    </script>
+    <script id="ptypeMedianData" type="application/json">
+        {{ ptype_median | tojson }}
+    </script>
+    <script id="bedMedianData" type="application/json">
+        {{ bed_median | tojson }}
+    </script>
+    <script id="ptypeCountData" type="application/json">
+        {{ ptype_counts | tojson }}
+    </script>
+
+</div>
+
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+</body>
+</html>
