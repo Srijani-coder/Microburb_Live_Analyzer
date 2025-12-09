@@ -6,7 +6,7 @@ import re
 app = Flask(__name__)
 
 API_URL = "https://www.microburbs.com.au/report_generator/api/suburb/properties"
-API_KEY = "test"   # sandbox key
+API_KEY = "test"   
 
 
 def fetch_suburb_data(suburb, property_type="all"):
@@ -119,8 +119,8 @@ def analyze_data(df):
         "mean_price": round(df["price"].mean(), 2),
         "min_price": round(df["price"].min(), 2),
         "max_price": round(df["price"].max(), 2),
-        "avg_bedrooms": round(df["bedrooms"].mean(), 2) if "bedrooms" in df.columns else None,
-        "avg_bathrooms": round(df["bathrooms"].mean(), 2) if "bathrooms" in df.columns else None,
+        "number of avg_bedrooms": int(round(df["bedrooms"].mean(), 2)) if "bedrooms" in df.columns else None,
+        "number of avg_bathrooms": int(round(df["bathrooms"].mean(), 2)) if "bathrooms" in df.columns else None,
     }
 
     # yearly listings
@@ -184,7 +184,7 @@ def index():
         if df.empty:
             return render_template(
                 "index.html",
-                error="No results returned for that suburb / property type combination."
+                error="No results returned for that suburb or property type combination."
             )
 
         stats, yearly_counts, ptype_median, bed_median, ptype_counts, sample_rows = analyze_data(df)
